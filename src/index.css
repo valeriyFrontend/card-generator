@@ -1,0 +1,98 @@
+:root {
+  --font-sans: 'DM Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --text: #3d3835;
+  --text-h: #1c1917;
+  --text-muted: #78716c;
+  --bg: #efeae4;
+  --bg-subtle: #e7e1d9;
+  --surface: #fffcf8;
+  --surface-2: #faf6f0;
+  --border: #d6cfc4;
+  --border-strong: #c4bbb0;
+  --code-bg: #f0ebe4;
+  --input-bg: #fffcf8;
+  --btn-bg: #f5f0e8;
+  --accent: #b91c1c;
+  --accent-hover: #991b1b;
+  --accent-muted: rgba(185, 28, 28, 0.12);
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.06);
+  --shadow-md: 0 8px 24px rgba(28, 25, 23, 0.08);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 16px;
+
+  font-family: var(--font-sans);
+  line-height: 1.55;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #d6d3d1;
+    --text-h: #fafaf9;
+    --text-muted: #a8a29e;
+    --bg: #0c0a09;
+    --bg-subtle: #1c1917;
+    --surface: #1c1917;
+    --surface-2: #292524;
+    --border: #44403c;
+    --border-strong: #57534e;
+    --code-bg: #292524;
+    --input-bg: #1c1917;
+    --btn-bg: #292524;
+    --accent: #f87171;
+    --accent-hover: #fca5a5;
+    --accent-muted: rgba(248, 113, 113, 0.15);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+    --shadow-md: 0 12px 40px rgba(0, 0, 0, 0.45);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--bg);
+  background-image: radial-gradient(
+    ellipse 120% 80% at 50% -20%,
+    var(--accent-muted),
+    transparent 55%
+  );
+}
+
+#root {
+  min-height: 100dvh;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  font-weight: 500;
+  padding: 0.12em 0.4em;
+  border-radius: 6px;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  color: var(--text-h);
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.8em;
+  padding: 0.15em 0.45em;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 0 var(--border-strong);
+  color: var(--text-h);
+}
