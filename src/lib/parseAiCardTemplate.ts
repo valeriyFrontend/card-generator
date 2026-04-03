@@ -33,6 +33,8 @@ function parseThemeObject(src: Record<string, unknown>): Partial<CardThemeColors
   if (bt) theme.bodyText = bt
   const ts = pickHex(src.tagStroke)
   if (ts) theme.tagStroke = ts
+  const tb = pickHex(src.tagBackground)
+  if (tb) theme.tagBackground = tb
   const ip = pickHex(src.imagePlaceholder)
   if (ip) theme.imagePlaceholder = ip
   return theme
@@ -206,6 +208,7 @@ export const AI_CARD_PROMPT_UK = `Ти допомагаєш заповнити �
     "titleOnAccent": "#FFFFFF",
     "bodyText": "#1e1e1e",
     "tagStroke": "#c92a2a",
+    "tagBackground": "#ffffff",
     "imagePlaceholder": "#ebfbee"
   }
 }

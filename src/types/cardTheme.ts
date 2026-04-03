@@ -10,6 +10,8 @@ export type CardThemeColors = {
   bodyText: string
   /** Обводка та текст бейджа */
   tagStroke: string
+  /** Заливка бейджа */
+  tagBackground: string
   /** Підкладка під зображення */
   imagePlaceholder: string
 }
@@ -20,6 +22,7 @@ export const DEFAULT_CARD_THEME: CardThemeColors = {
   titleOnAccent: '#FFFFFF',
   bodyText: '#1e1e1e',
   tagStroke: '#c92a2a',
+  tagBackground: '#ffffff',
   imagePlaceholder: '#ebfbee',
 }
 

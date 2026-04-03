@@ -210,33 +210,28 @@ export async function buildExcalidrawCard(
   )
 
   const tag = input.tag?.trim()
-  const tagGap = 12
 
   let tagY = 0
   let tagX = 0
   let tagW = 0
+  const tagH = 28
   if (tag) {
     tagW = Math.min(220, tag.length * 10 + 36)
-    if (imageW > 0) {
-      tagY = CONTENT_TOP + imageH + tagGap
-      const idealX = ox + PAD_X + (imageW - tagW) / 2
-      const minX = ox + PAD_X
-      const maxX = ox + CARD_W - PAD_X - tagW
-      tagX = Math.max(minX, Math.min(idealX, maxX))
-    } else {
-      tagY = textY + textH + tagGap
-      tagX = ox + (CARD_W - tagW) / 2
-    }
+    tagX = ox + (CARD_W - tagW) / 2
   }
 
   const contentBottom = Math.max(
     textY + textH,
     imageW > 0 ? CONTENT_TOP + imageH : textY,
-    tag ? tagY + 28 + 8 : 0,
   )
 
-  const bottomPad = tag ? 20 : 24
+  const bottomPad = 24
   const cardH = contentBottom - oy + bottomPad
+
+  if (tag) {
+    // Бейдж центруємо по нижньому бордеру (половина висоти всередині, половина зовні).
+    tagY = oy + cardH - tagH / 2
+  }
 
   const base = {
     angle: 0,
@@ -373,9 +368,9 @@ export async function buildExcalidrawCard(
       x: tagX,
       y: tagY,
       width: tagW,
-      height: 28,
+      height: tagH,
       strokeColor: theme.tagStroke,
-      backgroundColor: 'transparent',
+      backgroundColor: theme.tagBackground,
       strokeWidth: 1,
       roundness: { type: 3 },
       seed: randSeed(),
@@ -394,7 +389,7 @@ export async function buildExcalidrawCard(
       width: tagW - 20,
       height: 18,
       strokeColor: theme.tagStroke,
-      backgroundColor: 'transparent',
+      backgroundColor: theme.tagBackground,
       strokeWidth: 1,
       roundness: null,
       seed: randSeed(),
