@@ -43,7 +43,14 @@ function initialCardsJsonText(): string {
         title: 'Broker',
         body:
           'A professional antique trader and intermediary.\n\nA short description of the character or card theme.',
+        type: 'default',
         tag: 'trader',
+      },
+      {
+        title: 'Autumn Fair Opens',
+        body:
+          'Annual town fair with antique auctions.\n\nStarts at 10:00 in the main square.',
+        type: 'event',
       },
     ],
     null,
@@ -208,6 +215,7 @@ export default function App() {
           title: p.title?.trim() || `Card ${i + 1}`,
           body: p.body?.trim() || ' ',
           tag: p.tag !== undefined ? p.tag.trim() || undefined : undefined,
+          cardType: p.cardType,
           imageDataUrl,
           theme,
         }
@@ -304,8 +312,9 @@ export default function App() {
         <p className="app__lead">
           Put all cards into one JSON field: a single object, an array{' '}
           <code>[...]</code>, or <code>{`{ "cards": [...] }`}</code>. Fields:{' '}
-          <code>title</code>, <code>body</code>, <code>tag</code>, optional{' '}
-          <code>colors</code>. Images are attached separately for each card in order.
+          <code>title</code>, <code>body</code>, <code>type</code>, <code>tag</code>,
+          optional <code>colors</code>. Use <code>type: "event"</code> for event
+          cards. Images are attached separately for each card in order.
         </p>
       </header>
 
@@ -358,7 +367,8 @@ export default function App() {
               <p className="field__hint">
                 You can paste an AI response wrapped in <code>```json</code> ...{' '}
                 <code>```</code>. The number of cards in the array defines the number
-                of image rows below.
+                of image rows below. Supported types: <code>default</code>,{' '}
+                <code>event</code>.
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"

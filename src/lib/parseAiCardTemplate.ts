@@ -1,9 +1,11 @@
 import type { CardThemeColors } from '../types/cardTheme'
+import { normalizeCardType, type CardType } from '../types/cardType'
 
 export type AiTemplateFields = {
   title?: string
   body?: string
   tag?: string
+  cardType?: CardType
   theme?: Partial<CardThemeColors>
 }
 
@@ -130,6 +132,7 @@ function fieldsFromRecord(o: Record<string, unknown>): AiTemplateFields {
     o.body ?? o.description ?? o.opys ?? o.text ?? o.content,
   )
   const tag = pickStr(o.tag ?? o.badge ?? o.bedzh ?? o.label)
+  const cardType = normalizeCardType(o.type ?? o.cardType ?? o.kind ?? o.category)
 
   const fromFlat = parseThemeObject(o)
   const colors = o.colors
@@ -145,6 +148,7 @@ function fieldsFromRecord(o: Record<string, unknown>): AiTemplateFields {
     title,
     body,
     tag,
+    cardType,
     theme,
   }
 }
@@ -201,6 +205,7 @@ A single card is an object:
 {
   "title": "short title",
   "body": "description; paragraphs separated with \\n\\n",
+  "type": "default or event",
   "tag": "badge or \\"\\"",
   "colors": {
     "accent": "#D92323",
@@ -218,6 +223,7 @@ Shared "colors" can be defined in the first card or once at root level (for a si
 
 Rules:
 - Colors must be only #RGB or #RRGGBB.
+- "type" is optional; supported values: "default", "event".
 - "colors" and "tag" are optional; tag may be "".
 - Do not provide image data; user will add image files manually.
 

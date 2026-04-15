@@ -7,9 +7,16 @@ import type {
 } from '../types/excalidraw'
 import type { CardThemeColors } from '../types/cardTheme'
 import { resolveCardTheme } from '../types/cardTheme'
+import type { CardType } from '../types/cardType'
 
 const CARD_W = 750
 const HEADER_H_MIN = 70
+const EVENT_THEME_OVERRIDES: Partial<CardThemeColors> = {
+  accent: '#0B7285',
+  cardBackground: '#F1F3F5',
+  titleOnAccent: '#FFFFFF',
+  tagStroke: '#0B7285',
+}
 
 function excalId(): string {
   return nanoid(21)
@@ -137,6 +144,7 @@ export type CardInput = {
   title: string
   body: string
   tag?: string
+  cardType?: CardType
   /** data URL (for example image/png;base64,...) or empty */
   imageDataUrl?: string | null
   originX?: number
@@ -156,7 +164,8 @@ export async function buildExcalidrawCard(
   input: CardInput,
   buildOptions?: BuildExcalidrawCardOptions,
 ): Promise<ExcalidrawClipboard> {
-  const theme = resolveCardTheme(input.theme)
+  const eventTheme = input.cardType === 'event' ? EVENT_THEME_OVERRIDES : undefined
+  const theme = resolveCardTheme({ ...(eventTheme ?? {}), ...(input.theme ?? {}) })
   const gid = buildOptions?.groupId
   const groupIdsForEl = (): string[] => (gid ? [gid] : [])
   const ox = input.originX ?? 100
@@ -209,7 +218,8 @@ export async function buildExcalidrawCard(
     imageH > 0 ? imageH : 120,
   )
 
-  const tag = input.tag?.trim()
+  const rawTag = input.tag?.trim()
+  const tag = rawTag || (input.cardType === 'event' ? 'EVENT' : undefined)
 
   let tagY = 0
   let tagX = 0
