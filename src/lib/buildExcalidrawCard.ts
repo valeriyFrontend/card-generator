@@ -11,12 +11,8 @@ import type { CardType } from '../types/cardType'
 
 const CARD_W = 750
 const HEADER_H_MIN = 70
-const EVENT_THEME_OVERRIDES: Partial<CardThemeColors> = {
-  accent: '#0B7285',
-  cardBackground: '#F1F3F5',
-  titleOnAccent: '#FFFFFF',
-  tagStroke: '#0B7285',
-}
+const FONT_FAMILY_CASCADIA = 3
+const FONT_FAMILY_DEFAULT = 5
 
 function excalId(): string {
   return nanoid(21)
@@ -164,8 +160,10 @@ export async function buildExcalidrawCard(
   input: CardInput,
   buildOptions?: BuildExcalidrawCardOptions,
 ): Promise<ExcalidrawClipboard> {
-  const eventTheme = input.cardType === 'event' ? EVENT_THEME_OVERRIDES : undefined
-  const theme = resolveCardTheme({ ...(eventTheme ?? {}), ...(input.theme ?? {}) })
+  const theme = resolveCardTheme(input.theme)
+  const isEvent = input.cardType === 'event'
+  const titleFontFamily = isEvent ? FONT_FAMILY_CASCADIA : FONT_FAMILY_DEFAULT
+  const badgeFontFamily = isEvent ? FONT_FAMILY_CASCADIA : FONT_FAMILY_DEFAULT
   const gid = buildOptions?.groupId
   const groupIdsForEl = (): string[] => (gid ? [gid] : [])
   const ox = input.originX ?? 100
@@ -219,7 +217,7 @@ export async function buildExcalidrawCard(
   )
 
   const rawTag = input.tag?.trim()
-  const tag = rawTag || (input.cardType === 'event' ? 'EVENT' : undefined)
+  const tag = rawTag || (isEvent ? 'EVENT' : undefined)
 
   let tagY = 0
   let tagX = 0
@@ -310,7 +308,7 @@ export async function buildExcalidrawCard(
     version: 1,
     text: titleDisplay,
     fontSize: 32,
-    fontFamily: 5,
+    fontFamily: titleFontFamily,
     textAlign: 'center',
     verticalAlign: 'middle',
     containerId: null,
@@ -409,7 +407,7 @@ export async function buildExcalidrawCard(
       groupIds: groupIdsForEl(),
       text: tag.toUpperCase(),
       fontSize: 13,
-      fontFamily: 5,
+      fontFamily: badgeFontFamily,
       textAlign: 'center',
       verticalAlign: 'middle',
       containerId: null,
