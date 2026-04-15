@@ -8,9 +8,9 @@ export type ExcalidrawFileData = {
   mimeType: string
   id: string
   dataURL: string
-  /** очікує Excalidraw для BinaryFileData */
+  /** Required by Excalidraw BinaryFileData */
   created: number
-  /** як у реальному clipboard Excalidraw — без цього вставка зображень може ламатися */
+  /** Matches real Excalidraw clipboard; without it image paste may fail */
   lastRetrieved: number
 }
 

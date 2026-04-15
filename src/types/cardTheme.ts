@@ -1,18 +1,18 @@
-/** Кольори картки Excalidraw; усі поля задаються в JSON від ШІ (опційно). */
+/** Excalidraw card colors; all fields may be set in AI JSON (optional). */
 export type CardThemeColors = {
-  /** Рамка картки та заливка шапки */
+  /** Card border and header fill */
   accent: string
-  /** Фон тіла картки */
+  /** Card body background */
   cardBackground: string
-  /** Колір тексту заголовка на шапці */
+  /** Header title text color */
   titleOnAccent: string
-  /** Колір основного тексту опису */
+  /** Main body text color */
   bodyText: string
-  /** Обводка та текст бейджа */
+  /** Badge border and text color */
   tagStroke: string
-  /** Заливка бейджа */
+  /** Badge fill */
   tagBackground: string
-  /** Підкладка під зображення */
+  /** Image placeholder fill */
   imagePlaceholder: string
 }
 

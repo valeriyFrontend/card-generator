@@ -14,7 +14,7 @@ import {
   type CardInput,
 } from './lib/buildExcalidrawCard'
 import {
-  AI_CARD_PROMPT_UK,
+  AI_CARD_PROMPT_EN,
   parseAiCardTemplate,
 } from './lib/parseAiCardTemplate'
 import type { ExcalidrawClipboard } from './types/excalidraw'
@@ -40,10 +40,10 @@ function initialCardsJsonText(): string {
   return JSON.stringify(
     [
       {
-        title: 'Брокер',
+        title: 'Broker',
         body:
-          'Професійний торговець антикваріатом та посередником.\n\nКороткий опис персонажа або теми картки.',
-        tag: 'торговець',
+          'A professional antique trader and intermediary.\n\nA short description of the character or card theme.',
+        tag: 'trader',
       },
     ],
     null,
@@ -77,7 +77,7 @@ function newImageSlot(): ImageSlot {
   }
 }
 
-/** Перше зображення з буфера (скріншот, копія з браузера тощо). */
+/** First image from clipboard (screenshot, copied from browser, etc.). */
 function imageFileFromClipboardData(dt: DataTransfer | null): File | null {
   if (!dt) return null
   const { files } = dt
@@ -104,13 +104,8 @@ function imageFileFromClipboardEvent(e: ClipboardEvent): File | null {
   return imageFileFromClipboardData(e.clipboardData)
 }
 
-function cardsWordUk(n: number): string {
-  const m = n % 10
-  const h = n % 100
-  if (h >= 11 && h <= 14) return 'карток'
-  if (m === 1) return 'картка'
-  if (m >= 2 && m <= 4) return 'картки'
-  return 'карток'
+function cardsWordEn(n: number): string {
+  return n === 1 ? 'card' : 'cards'
 }
 
 export default function App() {
@@ -160,7 +155,7 @@ export default function App() {
       const n = parsed.length
       setImageSlots((prev) => alignImageSlots(prev, n))
     } catch {
-      /* залишаємо попередню кількість слотів, поки JSON не валідний */
+      /* keep previous number of slots until JSON becomes valid */
     }
   }, [cardsJsonText])
 
@@ -210,7 +205,7 @@ export default function App() {
         const theme =
           Object.keys(mergedTheme).length > 0 ? mergedTheme : undefined
         return {
-          title: p.title?.trim() || `Картка ${i + 1}`,
+          title: p.title?.trim() || `Card ${i + 1}`,
           body: p.body?.trim() || ' ',
           tag: p.tag !== undefined ? p.tag.trim() || undefined : undefined,
           imageDataUrl,
@@ -229,11 +224,11 @@ export default function App() {
       const n = parseAiCardTemplate(cardsJsonText).length
       await copyCardToClipboard(payload)
       setMessage(
-        `Скопійовано ${n} ${cardsWordUk(n)}. У Excalidraw клацніть по полотну, за потреби Tab, потім Ctrl+V / Cmd+V.`,
+        `Copied ${n} ${cardsWordEn(n)}. In Excalidraw, click the canvas, press Tab if needed, then Ctrl+V / Cmd+V.`,
       )
       setLastJson(JSON.stringify(payload, null, 2))
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Помилка копіювання')
+      setMessage(e instanceof Error ? e.message : 'Copy failed')
     } finally {
       setBusy(false)
     }
@@ -242,12 +237,12 @@ export default function App() {
   const handleCopyAiPrompt = async () => {
     setMessage(null)
     try {
-      await navigator.clipboard.writeText(AI_CARD_PROMPT_UK)
+      await navigator.clipboard.writeText(AI_CARD_PROMPT_EN)
       setMessage(
-        'Промпт для ШІ скопійовано — вставте в чат і допишіть тему або список карток.',
+        'AI prompt copied. Paste it into chat and add your topic or card list.',
       )
     } catch {
-      setMessage('Не вдалося скопіювати промпт. Скопіюйте текст вручну.')
+      setMessage('Could not copy the prompt. Please copy it manually.')
     }
   }
 
@@ -255,9 +250,9 @@ export default function App() {
     setMessage(null)
     try {
       await navigator.clipboard.writeText(title)
-      setMessage(`Назву скопійовано: «${title}»`)
+      setMessage(`Title copied: "${title}"`)
     } catch {
-      setMessage('Не вдалося скопіювати назву в буфер.')
+      setMessage('Could not copy title to clipboard.')
     }
   }, [])
 
@@ -275,9 +270,9 @@ export default function App() {
       a.click()
       URL.revokeObjectURL(a.href)
       setLastJson(JSON.stringify(payload, null, 2))
-      setMessage('JSON збережено.')
+      setMessage('JSON saved.')
     } catch (e) {
-      setMessage(e instanceof Error ? e.message : 'Помилка збереження')
+      setMessage(e instanceof Error ? e.message : 'Save failed')
     } finally {
       setBusy(false)
     }
@@ -298,19 +293,19 @@ export default function App() {
     const p = parsedCards?.[index]
     const t = p?.title?.trim()
     if (t) return t
-    return `Картка ${index + 1}`
+    return `Card ${index + 1}`
   }
 
   return (
     <div className="app">
       <header className="app__header">
-        <p className="app__eyebrow">Експорт у буфер</p>
-        <h1 className="app__title">Картки для Excalidraw</h1>
+        <p className="app__eyebrow">Clipboard export</p>
+        <h1 className="app__title">Cards for Excalidraw</h1>
         <p className="app__lead">
-          Усі картки в одному полі — JSON: один об’єкт, масив{' '}
-          <code>[...]</code> або <code>{`{ "cards": [...] }`}</code>. Поля:{' '}
-          <code>title</code>, <code>body</code>, <code>tag</code>, опційно{' '}
-          <code>colors</code>. Зображення — окремо для кожної картки за порядком.
+          Put all cards into one JSON field: a single object, an array{' '}
+          <code>[...]</code>, or <code>{`{ "cards": [...] }`}</code>. Fields:{' '}
+          <code>title</code>, <code>body</code>, <code>tag</code>, optional{' '}
+          <code>colors</code>. Images are attached separately for each card in order.
         </p>
       </header>
 
@@ -330,7 +325,7 @@ export default function App() {
                 className="btn btn--secondary"
                 onClick={() => void handleCopyAiPrompt()}
               >
-                Копіювати промпт для ШІ
+                Copy AI prompt
               </button>
               {Object.keys(cardTheme).length > 0 ? (
                 <button
@@ -338,32 +333,32 @@ export default function App() {
                   className="btn btn--ghost"
                   onClick={() => {
                     setCardTheme({})
-                    setMessage('Кастомні кольори скинуто до стандартних.')
+                    setMessage('Custom colors reset to defaults.')
                   }}
                 >
-                  Скинути кольори
+                  Reset colors
                 </button>
               ) : null}
               <span className="cards-toolbar__meta">
-                У буфері буде <strong>{parsedCount}</strong>{' '}
-                {cardsWordUk(parsedCount)}
+                Clipboard will contain <strong>{parsedCount}</strong>{' '}
+                {cardsWordEn(parsedCount)}
                 {jsonInvalid ? (
                   <span className="cards-toolbar__warn">
                     {' '}
-                    — JSON зараз некоректний; виправте текст перед копіюванням.
+                    - JSON is currently invalid; fix it before copying.
                   </span>
                 ) : null}
               </span>
             </div>
           </div>
 
-          <section className="surface surface--editor" aria-label="Редактор JSON карток">
+          <section className="surface surface--editor" aria-label="Cards JSON editor">
             <label className="field">
-              <span className="field__label">Картки (JSON)</span>
+              <span className="field__label">Cards (JSON)</span>
               <p className="field__hint">
-                Можна вставити відповідь ШІ у блоці <code>```json</code> …{' '}
-                <code>```</code>. Кількість карток у масиві визначає кількість
-                рядків зображень нижче.
+                You can paste an AI response wrapped in <code>```json</code> ...{' '}
+                <code>```</code>. The number of cards in the array defines the number
+                of image rows below.
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"
@@ -375,14 +370,14 @@ export default function App() {
             </label>
           </section>
 
-          <section className="surface surface--images" aria-label="Зображення для карток">
+          <section className="surface surface--images" aria-label="Card images">
             <div className="card-images">
-              <h2 className="card-images__title">Зображення за порядком карток</h2>
+              <h2 className="card-images__title">Images in card order</h2>
               <p className="field__hint">
-                Картка 1 — перший файл у списку, далі за номером. Без файлу
-                експортується лише текст і рамка. Зображення з буфера: наведіть
-                курсор на зону вставки рядка й натисніть Cmd+V / Ctrl+V, або
-                клацніть по зоні (або Tab) і вставте так само.
+                Card 1 uses the first file, then by index. Without an image file,
+                only text and frame are exported. To paste from clipboard, hover
+                the row's paste zone and press Cmd+V / Ctrl+V, or focus the zone
+                (click or Tab) and paste the same way.
               </p>
               {imageSlots.slice(0, parsedCount).map((slot, index) => {
                 const rowTitle = cardTitleAt(index)
@@ -401,9 +396,9 @@ export default function App() {
                           type="button"
                           className="btn btn--ghost card-images__copy-title"
                           onClick={() => void copyCardTitle(rowTitle)}
-                          aria-label={`Копіювати назву «${rowTitle}» в буфер`}
+                          aria-label={`Copy title "${rowTitle}" to clipboard`}
                         >
-                          Копіювати назву
+                          Copy title
                         </button>
                       </div>
                       <div
@@ -415,7 +410,7 @@ export default function App() {
                         }
                         tabIndex={0}
                         role="group"
-                        aria-label={`Зона вставки зображення для «${rowTitle}»`}
+                        aria-label={`Image paste zone for "${rowTitle}"`}
                         onPointerEnter={() =>
                           onPasteZonePointerEnter(slot.id)
                         }
@@ -449,7 +444,7 @@ export default function App() {
                           ) : null}
                         </div>
                         <p className="card-images__paste-hint">
-                          Наведіть курсор або клікніть сюди → Cmd+V / Ctrl+V
+                          Hover or click here -&gt; Cmd+V / Ctrl+V
                         </p>
                       </div>
                     </div>
@@ -461,7 +456,7 @@ export default function App() {
 
           <div className="actions">
             <button className="btn btn--primary" type="submit" disabled={busy}>
-              {busy ? 'Зачекайте…' : 'Копіювати всі картки в буфер'}
+              {busy ? 'Please wait...' : 'Copy all cards to clipboard'}
             </button>
             <button
               className="btn"
@@ -469,7 +464,7 @@ export default function App() {
               disabled={busy}
               onClick={() => void handleDownload()}
             >
-              Завантажити JSON
+              Download JSON
             </button>
           </div>
         </form>
@@ -478,7 +473,7 @@ export default function App() {
 
         {lastJson ? (
           <details className="json-preview">
-            <summary>Переглянути згенерований JSON</summary>
+            <summary>View generated JSON</summary>
             <pre className="json-preview__pre">{lastJson}</pre>
           </details>
         ) : null}
@@ -486,15 +481,15 @@ export default function App() {
 
       <footer className="app__footer">
         <p>
-          <strong>Як вставити в Excalidraw:</strong> курсор над полотном, клацніть
-          по ньому, за потреби <kbd>Tab</kbd>, потім Cmd+V / Ctrl+V.
+          <strong>How to paste into Excalidraw:</strong> place the cursor over the
+          canvas, click it, press <kbd>Tab</kbd> if needed, then Cmd+V / Ctrl+V.
         </p>
         <p>
-          Сторінка — лише <code>localhost</code> або <code>https</code>.
+          Page must be served from <code>localhost</code> or <code>https</code>.
         </p>
         <p>
-          У <code>files</code> ключ і <code>id</code> та <code>fileId</code> у
-          зображенні мають збігатися.
+          In <code>files</code>, the key and <code>id</code> must match, and
+          image <code>fileId</code> must reference that same value.
         </p>
       </footer>
     </div>

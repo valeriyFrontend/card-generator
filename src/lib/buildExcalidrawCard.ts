@@ -33,7 +33,7 @@ export function loadImageDimensions(
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.onload = () => resolve({ w: img.naturalWidth, h: img.naturalHeight })
-    img.onerror = () => reject(new Error('Не вдалося прочитати зображення'))
+    img.onerror = () => reject(new Error('Failed to read image'))
     img.src = dataUrl
   })
 }
@@ -49,12 +49,12 @@ function fitBox(
 }
 
 /**
- * Excalifont у Excalidraw трохи ширший за типовий system-ui; звужуємо доступну ширину
- * для переносів, щоб висота текстового блоку збігалася без «підрізання» до кліку.
+ * Excalifont in Excalidraw is slightly wider than typical system-ui; reduce available
+ * wrap width so text block height matches without clipping before first click.
  */
 const WRAP_WIDTH_FUDGE = 0.88
 
-/** Резерв, якщо немає canvas (SSR). */
+/** Fallback when canvas is unavailable (SSR). */
 function estimateLinesFallback(text: string, maxWidthPx: number, fontSize: number): number {
   const charsPerLine = Math.max(12, Math.floor(maxWidthPx / (fontSize * 0.48)))
   let lines = 0
@@ -72,7 +72,7 @@ function canvasFont(size: number, weight: number | string = 400): string {
   return `${weight} ${size}px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif`
 }
 
-/** Розбиває текст на рядки так само за логікою word-wrap (як наближено в canvas Excalidraw). */
+/** Splits text into lines using a wrap strategy close to Excalidraw canvas behavior. */
 function wrapTextToLines(
   text: string,
   maxWidthPx: number,
@@ -137,18 +137,18 @@ export type CardInput = {
   title: string
   body: string
   tag?: string
-  /** data URL (наприклад image/png;base64,...) або порожньо */
+  /** data URL (for example image/png;base64,...) or empty */
   imageDataUrl?: string | null
   originX?: number
   originY?: number
-  /** Кольори з ШІ або вручну; не задані поля беруться з дефолту */
+  /** AI or manual colors; missing fields fallback to defaults */
   theme?: Partial<CardThemeColors>
 }
 
 export type { CardThemeColors } from '../types/cardTheme'
 
 export type BuildExcalidrawCardOptions = {
-  /** Якщо задано, усі елементи картки отримають цей id у `groupIds` (одна група в Excalidraw). */
+  /** If provided, all card elements receive this id in `groupIds` (single Excalidraw group). */
   groupId?: string
 }
 
@@ -229,7 +229,7 @@ export async function buildExcalidrawCard(
   const cardH = contentBottom - oy + bottomPad
 
   if (tag) {
-    // Бейдж центруємо по нижньому бордеру (половина висоти всередині, половина зовні).
+    // Center badge on bottom border (half inside card, half outside).
     tagY = oy + cardH - tagH / 2
   }
 
@@ -426,14 +426,14 @@ export async function buildExcalidrawCard(
 const STACK_GAP = 48
 
 /**
- * Кілька карток у одному clipboard: вертикальна колона, спільний `files`.
+ * Multiple cards in one clipboard: vertical stack with shared `files`.
  */
 export async function buildStackedExcalidrawCards(
   inputs: CardInput[],
   options?: { originX?: number; startY?: number; gap?: number },
 ): Promise<ExcalidrawClipboard> {
   if (inputs.length === 0) {
-    throw new Error('Додайте хоча б одну картку.')
+    throw new Error('Add at least one card.')
   }
   const ox = options?.originX ?? 100
   let cursorY = options?.startY ?? 100
@@ -486,8 +486,8 @@ function randNonce(): number {
 }
 
 /**
- * Excalidraw очікує: для кожного елемента `image` існує `files[fileId]`,
- * і `files[fileId].id === fileId`. Інакше вставка картки «мовчки» ламається.
+ * Excalidraw expects: each `image` element must have `files[fileId]`,
+ * and `files[fileId].id === fileId`. Otherwise pasting can fail silently.
  */
 export function assertExcalidrawClipboardValid(payload: ExcalidrawClipboard): void {
   for (const el of payload.elements) {
@@ -495,22 +495,22 @@ export function assertExcalidrawClipboardValid(payload: ExcalidrawClipboard): vo
     const entry = payload.files[el.fileId]
     if (!entry) {
       throw new Error(
-        `Некоректний буфер: для зображення немає запису files["${el.fileId}"].`,
+        `Invalid clipboard: missing files["${el.fileId}"] entry for image.`,
       )
     }
     if (entry.id !== el.fileId) {
       throw new Error(
-        `Некоректний буфер: files["${el.fileId}"].id має дорівнювати "${el.fileId}", зараз "${entry.id}".`,
+        `Invalid clipboard: files["${el.fileId}"].id must equal "${el.fileId}", got "${entry.id}".`,
       )
     }
   }
 }
 
 
-/** Той самий тип, що й у пакеті Excalidraw (copyToClipboard). */
+/** Same MIME type used by Excalidraw package (copyToClipboard). */
 const MIME_EXCALIDRAW_CLIPBOARD = 'application/vnd.excalidraw.clipboard+json'
 
-/** execCommand часто падає на великому тексті (~150k+), не покладаємось на нього для великих JSON. */
+/** execCommand often fails on large text (~150k+), so avoid it for large JSON payloads. */
 const MAX_EXEC_COMMAND_CHARS = 120_000
 
 function copyViaExecCommand(text: string): boolean {
@@ -539,7 +539,7 @@ export async function copyCardToClipboard(payload: ExcalidrawClipboard): Promise
   const plainBlob = () => new Blob([json], { type: 'text/plain' })
   const vendorBlob = () => new Blob([json], { type: MIME_EXCALIDRAW_CLIPBOARD })
 
-  // 1) Як офіційний copyToClipboard: обидва типи в одному ClipboardItem (де підтримується).
+  // 1) Mirror official copyToClipboard: both MIME types in one ClipboardItem (where supported).
   if (navigator.clipboard?.write && window.ClipboardItem) {
     try {
       await navigator.clipboard.write([
@@ -550,7 +550,7 @@ export async function copyCardToClipboard(payload: ExcalidrawClipboard): Promise
       ])
       return
     } catch {
-      /* writeText / спрощений ClipboardItem */
+      /* fallback to writeText / simplified ClipboardItem */
     }
     try {
       await navigator.clipboard.write([
@@ -558,7 +558,7 @@ export async function copyCardToClipboard(payload: ExcalidrawClipboard): Promise
       ])
       return
     } catch {
-      /* далі */
+      /* continue */
     }
   }
 
@@ -567,13 +567,13 @@ export async function copyCardToClipboard(payload: ExcalidrawClipboard): Promise
       await navigator.clipboard.writeText(json)
       return
     } catch {
-      /* execCommand лише для невеликих даних */
+      /* fallback to execCommand only for small payloads */
     }
   }
 
   if (json.length <= MAX_EXEC_COMMAND_CHARS && copyViaExecCommand(json)) return
 
   throw new Error(
-    'Не вдалося скопіювати в буфер. Відкрийте сайт через https або localhost, дозвольте доступ до буфера або скористайтесь «Завантажити JSON».',
+    'Could not copy to clipboard. Open the app via https or localhost, allow clipboard access, or use "Download JSON".',
   )
 }
