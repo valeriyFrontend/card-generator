@@ -386,9 +386,9 @@ export default function App() {
               <p className="field__hint">
                 You can paste an AI response wrapped in <code>```json</code> ...{' '}
                 <code>```</code>. The number of cards in the array defines the number
-                of image rows below. Supported types: <code>default</code>,{' '}
-                <code>event</code>. Each card should have its own <code>colors</code>{' '}
-                palette (AI picks hues per card theme).
+                of image rows below. Add optional <code>type</code> (<code>default</code> or{' '}
+                <code>event</code>) manually when needed — it is not part of the AI prompt.
+                Each card should have its own <code>colors</code> palette.
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"

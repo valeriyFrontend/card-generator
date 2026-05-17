@@ -257,7 +257,6 @@ A single card is an object:
 {
   "title": "short title",
   "body": "description; paragraphs separated with \\n\\n",
-  "type": "default or event",
   "tag": "short badge on the card (1–3 words) or \\"\\"",
   "colors": {
     "accent": "#hex",
@@ -274,11 +273,11 @@ For multiple cards, return either array [ {...}, {...} ] or one object with "car
 
 Rules:
 - Colors must be only #RGB or #RRGGBB.
-- "type" is optional; supported values: "default", "event".
 - Always include a full "colors" object on every card. Do NOT reuse one fixed palette for all cards and do NOT copy placeholder hex values from this template.
-- Choose colors per card from its role, faction, mood, season, danger level, or event theme. Neighboring cards in a batch should look visually distinct when their themes differ.
-- "type": "default" — character, item, location, or lore cards: cohesive palette that fits the subject (e.g. forest/nature → greens; arcane → purples; noble/gold → deep blue + gold accent; undead/dark → muted purples or blue-grays).
-- "type": "event" — happenings, quests, festivals, disasters: bolder accent (announcement feel). Festive/warm events → oranges, golds, crimson; ominous → dark red, charcoal accent, cool gray background; mystery → indigo/violet.
+- Choose colors per card from its role, faction, mood, season, danger level, or theme. Neighboring cards in a batch should look visually distinct when their themes differ.
+- Characters, items, locations, lore: cohesive palette that fits the subject (e.g. forest/nature → greens; arcane → purples; noble/gold → deep blue + gold accent; undead/dark → muted purples or blue-grays).
+- Happenings, quests, festivals, disasters: bolder accent (announcement feel). Festive/warm → oranges, golds, crimson; ominous → dark red, charcoal accent, cool gray background; mystery → indigo/violet.
+- Do NOT include a "type" field; the user sets card type in the app after pasting JSON.
 - Color relationships: "accent" = header bar and card border; "cardBackground" = body (light tint or soft neutral, readable with "bodyText"); "titleOnAccent" must contrast "accent" (usually #FFFFFF or near-black on light accents); "tagStroke" = darker or richer variant of accent; "tagBackground" = white or very light tint; "imagePlaceholder" = very light tint of the accent hue.
 - Keep text readable: sufficient contrast for title on accent and body on card background.
 - "tag" is optional; may be "". It is the single label shown on the card.
