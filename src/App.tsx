@@ -285,16 +285,6 @@ export default function App() {
     }
   }, [])
 
-  const copyCardTags = useCallback(async (tags: string[]) => {
-    setMessage(null)
-    try {
-      await navigator.clipboard.writeText(formatTagsPlain(tags))
-      setMessage(`Tags copied: ${formatTagsPlain(tags)}`)
-    } catch {
-      setMessage('Could not copy tags to clipboard.')
-    }
-  }, [])
-
   const handleDownload = async () => {
     setMessage(null)
     setBusy(true)
@@ -445,16 +435,6 @@ export default function App() {
                         >
                           Copy title
                         </button>
-                        {rowTags && rowTags.length > 0 ? (
-                          <button
-                            type="button"
-                            className="btn btn--ghost card-images__copy-title"
-                            onClick={() => void copyCardTags(rowTags)}
-                            aria-label={`Copy tags for "${rowTitle}"`}
-                          >
-                            Copy tags
-                          </button>
-                        ) : null}
                       </div>
                       {rowTags && rowTags.length > 0 ? (
                         <p className="card-images__tags" title={formatTagsPlain(rowTags)}>
