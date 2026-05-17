@@ -160,15 +160,6 @@ export type BuildExcalidrawCardOptions = {
   groupId?: string;
 };
 
-/** Badge: optional `tag`, or `type` when not `default` (e.g. event → EVENT). */
-function cardBadgeLabel(input: CardInput): string | undefined {
-  const explicit = input.tag?.trim();
-  if (explicit) return explicit;
-  const ct = input.cardType;
-  if (ct && ct !== "default") return ct.toUpperCase();
-  return undefined;
-}
-
 export async function buildExcalidrawCard(
   input: CardInput,
   buildOptions?: BuildExcalidrawCardOptions,
@@ -233,7 +224,8 @@ export async function buildExcalidrawCard(
     imageH > 0 ? imageH : 120,
   );
 
-  const tag = cardBadgeLabel(input);
+  const rawTag = input.tag?.trim();
+  const tag = rawTag || (isEvent ? "EVENT" : undefined);
 
   let tagY = 0;
   let tagX = 0;

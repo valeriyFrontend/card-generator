@@ -330,10 +330,10 @@ export default function App() {
         <p className="app__lead">
           Put all cards into one JSON field: a single object, an array{' '}
           <code>[...]</code>, or <code>{`{ "cards": [...] }`}</code>. Fields:{' '}
-          <code>title</code>, <code>body</code>, <code>type</code>, optional{' '}
-          <code>tag</code>, <code>colors</code>. Use <code>type: "event"</code> for
-          event cards (shows an EVENT badge). Images are attached separately for each
-          card in order.
+          <code>title</code>, <code>body</code>, <code>type</code>, <code>tag</code>, optional{' '}
+          <code>colors</code>. Use{' '}
+          <code>type: "event"</code> for event
+          cards. Images are attached separately for each card in order.
         </p>
       </header>
 
@@ -386,9 +386,9 @@ export default function App() {
               <p className="field__hint">
                 You can paste an AI response wrapped in <code>```json</code> ...{' '}
                 <code>```</code>. The number of cards in the array defines the number
-                of image rows below. Types: <code>default</code> (no type badge),{' '}
-                <code>event</code> (EVENT badge). Optional <code>tag</code> overrides
-                the badge. Each card should have its own <code>colors</code> palette.
+                of image rows below. Supported types: <code>default</code>,{' '}
+                <code>event</code>. Each card should have its own <code>colors</code>{' '}
+                palette (AI picks hues per card theme).
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"
@@ -411,6 +411,7 @@ export default function App() {
               </p>
               {imageSlots.slice(0, parsedCount).map((slot, index) => {
                 const rowTitle = cardTitleAt(index)
+                const rowType = parsedCards?.[index]?.cardType
                 return (
                   <div key={slot.id} className="card-images__row">
                     <span className="card-images__idx">{index + 1}</span>
@@ -431,6 +432,11 @@ export default function App() {
                           Copy title
                         </button>
                       </div>
+                      {rowType && rowType !== 'default' ? (
+                        <p className="card-images__type">
+                          <span className="card-images__type-badge">{rowType}</span>
+                        </p>
+                      ) : null}
                       <div
                         className={
                           'card-images__paste-zone' +

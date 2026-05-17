@@ -253,14 +253,11 @@
   padding: 0.35rem 0.5rem;
 }
 
-.card-images__tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
+.card-images__type {
   margin: 0 0 0.5rem;
 }
 
-.card-images__tag {
+.card-images__type-badge {
   font-size: 0.72rem;
   font-weight: 600;
   line-height: 1.2;
@@ -268,6 +265,7 @@
   border-radius: 6px;
   color: var(--accent);
   background: var(--accent-muted);
+  text-transform: lowercase;
 }
 
 .card-images__idx {
