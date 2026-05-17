@@ -15,7 +15,6 @@ import {
 } from './lib/buildExcalidrawCard'
 import {
   AI_CARD_PROMPT_EN,
-  formatTagsPlain,
   parseAiCardTemplate,
 } from './lib/parseAiCardTemplate'
 import type { ExcalidrawClipboard } from './types/excalidraw'
@@ -46,7 +45,6 @@ function initialCardsJsonText(): string {
           'A professional antique trader and intermediary.\n\nA short description of the character or card theme.',
         type: 'default',
         tag: 'trader',
-        tags: ['npc', 'trader', 'antiques', 'town', 'merchant'],
         colors: {
           accent: '#5c4a32',
           cardBackground: '#faf6f0',
@@ -62,7 +60,6 @@ function initialCardsJsonText(): string {
         body:
           'Annual town fair with antique auctions.\n\nStarts at 10:00 in the main square.',
         type: 'event',
-        tags: ['event', 'fair', 'autumn', 'auction', 'town-square'],
         colors: {
           accent: '#c45c1a',
           cardBackground: '#fff8f0',
@@ -333,10 +330,10 @@ export default function App() {
         <p className="app__lead">
           Put all cards into one JSON field: a single object, an array{' '}
           <code>[...]</code>, or <code>{`{ "cards": [...] }`}</code>. Fields:{' '}
-          <code>title</code>, <code>body</code>, <code>type</code>, <code>tag</code>,{' '}
-          <code>tags</code>, optional <code>colors</code>. Use{' '}
-          <code>type: "event"</code> for event
-          cards. Images are attached separately for each card in order.
+          <code>title</code>, <code>body</code>, <code>type</code>, optional{' '}
+          <code>tag</code>, <code>colors</code>. Use <code>type: "event"</code> for
+          event cards (shows an EVENT badge). Images are attached separately for each
+          card in order.
         </p>
       </header>
 
@@ -389,10 +386,9 @@ export default function App() {
               <p className="field__hint">
                 You can paste an AI response wrapped in <code>```json</code> ...{' '}
                 <code>```</code>. The number of cards in the array defines the number
-                of image rows below. Supported types: <code>default</code>,{' '}
-                <code>event</code>. Field <code>tags</code> is an array of keywords
-                for notes (AI should generate 3–8 per card). Each card should have
-                its own <code>colors</code> palette (AI picks hues per card theme).
+                of image rows below. Types: <code>default</code> (no type badge),{' '}
+                <code>event</code> (EVENT badge). Optional <code>tag</code> overrides
+                the badge. Each card should have its own <code>colors</code> palette.
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"
@@ -415,7 +411,6 @@ export default function App() {
               </p>
               {imageSlots.slice(0, parsedCount).map((slot, index) => {
                 const rowTitle = cardTitleAt(index)
-                const rowTags = parsedCards?.[index]?.tags
                 return (
                   <div key={slot.id} className="card-images__row">
                     <span className="card-images__idx">{index + 1}</span>
@@ -436,15 +431,6 @@ export default function App() {
                           Copy title
                         </button>
                       </div>
-                      {rowTags && rowTags.length > 0 ? (
-                        <p className="card-images__tags" title={formatTagsPlain(rowTags)}>
-                          {rowTags.map((t) => (
-                            <span key={t} className="card-images__tag">
-                              {t}
-                            </span>
-                          ))}
-                        </p>
-                      ) : null}
                       <div
                         className={
                           'card-images__paste-zone' +
