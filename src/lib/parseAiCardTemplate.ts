@@ -1,3 +1,4 @@
+import { jsonrepair } from 'jsonrepair'
 import type { CardThemeColors } from '../types/cardTheme'
 import { normalizeCardType, type CardType } from '../types/cardType'
 
@@ -202,18 +203,27 @@ function parseOneCardObject(obj: unknown, indexLabel: string): AiTemplateFields 
   return fieldsFromRecord(obj as Record<string, unknown>)
 }
 
+function parseJsonRoot(jsonStr: string): unknown {
+  try {
+    return JSON.parse(jsonStr)
+  } catch {
+    try {
+      return JSON.parse(jsonrepair(jsonStr))
+    } catch {
+      throw new Error(
+        'AI response JSON is invalid (syntax error). Common cause: unescaped double quotes inside "body" or "title" (use \\" or «» instead of "word").',
+      )
+    }
+  }
+}
+
 /**
  * Parses chat response: a single card object, `{ "cards": [ ... ] }`, or array `[ {...}, ... ]`.
  * Returns list of cards (at least one element).
  */
 export function parseAiCardTemplate(raw: string): AiTemplateFields[] {
   const jsonStr = extractAiJsonString(raw)
-  let root: unknown
-  try {
-    root = JSON.parse(jsonStr)
-  } catch {
-    throw new Error('AI response JSON is invalid (syntax error).')
-  }
+  const root = parseJsonRoot(jsonStr)
 
   if (Array.isArray(root)) {
     if (root.length === 0) {
@@ -275,6 +285,7 @@ Rules:
 - "tag" and "tags" are optional; tag may be "".
 - Always provide "tags": 3–8 lowercase English keywords (role, faction, location, mood, etc.). Use hyphens for multi-word tags (e.g. "town-square"). No "#" prefix.
 - "tag" is the single label shown on the card; if omitted, the app may use the first entry from "tags".
+- In "title" and "body", escape any double quotes as \\" (e.g. includes \\"out of the box\\" features). Prefer «» or apostrophes over raw " inside text.
 - Do not provide image data; user will add image files manually.
 
 Topic / list of characters or cards (to be inserted by user):`
