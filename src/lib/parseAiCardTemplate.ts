@@ -4,7 +4,10 @@ import { normalizeCardType, type CardType } from '../types/cardType'
 export type AiTemplateFields = {
   title?: string
   body?: string
+  /** Short badge on the Excalidraw card (one label). */
   tag?: string
+  /** Metadata tags for notes / search (from AI). */
+  tags?: string[]
   cardType?: CardType
   theme?: Partial<CardThemeColors>
 }
@@ -21,6 +24,42 @@ function pickStr(v: unknown): string | undefined {
   if (typeof v !== 'string') return undefined
   const t = v.trim()
   return t.length > 0 ? t : undefined
+}
+
+function normalizeTagToken(raw: string): string | undefined {
+  let t = raw.trim()
+  if (t.startsWith('#')) t = t.slice(1).trim()
+  return t.length > 0 ? t : undefined
+}
+
+/** Parses `tags` array or comma/semicolon-separated string; dedupes case-insensitively. */
+export function pickTags(v: unknown): string[] | undefined {
+  const tokens: string[] = []
+
+  const pushToken = (raw: string) => {
+    const t = normalizeTagToken(raw)
+    if (!t) return
+    const key = t.toLowerCase()
+    if (tokens.some((x) => x.toLowerCase() === key)) return
+    tokens.push(t)
+  }
+
+  if (typeof v === 'string') {
+    for (const part of v.split(/[,;]/)) pushToken(part)
+  } else if (Array.isArray(v)) {
+    for (const item of v) {
+      if (typeof item === 'string') pushToken(item)
+    }
+  } else {
+    return undefined
+  }
+
+  return tokens.length > 0 ? tokens : undefined
+}
+
+/** Comma-separated tags for clipboard or filenames. */
+export function formatTagsPlain(tags: string[] | undefined): string {
+  return tags?.join(', ') ?? ''
 }
 
 function parseThemeObject(src: Record<string, unknown>): Partial<CardThemeColors> {
@@ -113,7 +152,7 @@ function extractAiJsonString(raw: string): string {
         : Math.min(objStart, arrStart)
   if (start < 0) {
     throw new Error(
-      'No JSON found (object or array). Use a ```json ... ``` block with title, body, tag fields, or an array of cards.',
+      'No JSON found (object or array). Use a ```json ... ``` block with title, body, tag/tags fields, or an array of cards.',
     )
   }
   if (t[start] === '{') {
@@ -131,7 +170,9 @@ function fieldsFromRecord(o: Record<string, unknown>): AiTemplateFields {
   const body = pickStr(
     o.body ?? o.description ?? o.opys ?? o.text ?? o.content,
   )
-  const tag = pickStr(o.tag ?? o.badge ?? o.bedzh ?? o.label)
+  const tags = pickTags(o.tags ?? o.labels ?? o.keywords ?? o.tagi)
+  let tag = pickStr(o.tag ?? o.badge ?? o.bedzh ?? o.label)
+  if (!tag && tags?.length) tag = tags[0]
   const cardType = normalizeCardType(o.type ?? o.cardType ?? o.kind ?? o.category)
 
   const fromFlat = parseThemeObject(o)
@@ -148,6 +189,7 @@ function fieldsFromRecord(o: Record<string, unknown>): AiTemplateFields {
     title,
     body,
     tag,
+    tags,
     cardType,
     theme,
   }
@@ -206,25 +248,33 @@ A single card is an object:
   "title": "short title",
   "body": "description; paragraphs separated with \\n\\n",
   "type": "default or event",
-  "tag": "badge or \\"\\"",
+  "tag": "short badge on the card (1–3 words) or \\"\\"",
+  "tags": ["keyword1", "keyword2", "keyword3"],
   "colors": {
-    "accent": "#D92323",
-    "cardBackground": "#f8f9fa",
-    "titleOnAccent": "#FFFFFF",
-    "bodyText": "#1e1e1e",
-    "tagStroke": "#c92a2a",
-    "tagBackground": "#ffffff",
-    "imagePlaceholder": "#ebfbee"
+    "accent": "#hex",
+    "cardBackground": "#hex",
+    "titleOnAccent": "#hex",
+    "bodyText": "#hex",
+    "tagStroke": "#hex",
+    "tagBackground": "#hex",
+    "imagePlaceholder": "#hex"
   }
 }
 
 For multiple cards, return either array [ {...}, {...} ] or one object with "cards": [ {...}, ... ].
-Shared "colors" can be defined in the first card or once at root level (for a single object).
 
 Rules:
 - Colors must be only #RGB or #RRGGBB.
 - "type" is optional; supported values: "default", "event".
-- "colors" and "tag" are optional; tag may be "".
+- Always include a full "colors" object on every card. Do NOT reuse one fixed palette for all cards and do NOT copy placeholder hex values from this template.
+- Choose colors per card from its role, faction, mood, season, danger level, or event theme. Neighboring cards in a batch should look visually distinct when their themes differ.
+- "type": "default" — character, item, location, or lore cards: cohesive palette that fits the subject (e.g. forest/nature → greens; arcane → purples; noble/gold → deep blue + gold accent; undead/dark → muted purples or blue-grays).
+- "type": "event" — happenings, quests, festivals, disasters: bolder accent (announcement feel). Festive/warm events → oranges, golds, crimson; ominous → dark red, charcoal accent, cool gray background; mystery → indigo/violet.
+- Color relationships: "accent" = header bar and card border; "cardBackground" = body (light tint or soft neutral, readable with "bodyText"); "titleOnAccent" must contrast "accent" (usually #FFFFFF or near-black on light accents); "tagStroke" = darker or richer variant of accent; "tagBackground" = white or very light tint; "imagePlaceholder" = very light tint of the accent hue.
+- Keep text readable: sufficient contrast for title on accent and body on card background.
+- "tag" and "tags" are optional; tag may be "".
+- Always provide "tags": 3–8 lowercase English keywords (role, faction, location, mood, etc.). Use hyphens for multi-word tags (e.g. "town-square"). No "#" prefix.
+- "tag" is the single label shown on the card; if omitted, the app may use the first entry from "tags".
 - Do not provide image data; user will add image files manually.
 
 Topic / list of characters or cards (to be inserted by user):`

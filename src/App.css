@@ -253,6 +253,23 @@
   padding: 0.35rem 0.5rem;
 }
 
+.card-images__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0 0 0.5rem;
+}
+
+.card-images__tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.2;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  color: var(--accent);
+  background: var(--accent-muted);
+}
+
 .card-images__idx {
   flex: 0 0 2.25rem;
   width: 2.25rem;

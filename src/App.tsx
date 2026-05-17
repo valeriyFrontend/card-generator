@@ -15,6 +15,7 @@ import {
 } from './lib/buildExcalidrawCard'
 import {
   AI_CARD_PROMPT_EN,
+  formatTagsPlain,
   parseAiCardTemplate,
 } from './lib/parseAiCardTemplate'
 import type { ExcalidrawClipboard } from './types/excalidraw'
@@ -45,12 +46,32 @@ function initialCardsJsonText(): string {
           'A professional antique trader and intermediary.\n\nA short description of the character or card theme.',
         type: 'default',
         tag: 'trader',
+        tags: ['npc', 'trader', 'antiques', 'town', 'merchant'],
+        colors: {
+          accent: '#5c4a32',
+          cardBackground: '#faf6f0',
+          titleOnAccent: '#FFFFFF',
+          bodyText: '#2b2118',
+          tagStroke: '#4a3a28',
+          tagBackground: '#fffdf8',
+          imagePlaceholder: '#f0ebe3',
+        },
       },
       {
         title: 'Autumn Fair Opens',
         body:
           'Annual town fair with antique auctions.\n\nStarts at 10:00 in the main square.',
         type: 'event',
+        tags: ['event', 'fair', 'autumn', 'auction', 'town-square'],
+        colors: {
+          accent: '#c45c1a',
+          cardBackground: '#fff8f0',
+          titleOnAccent: '#FFFFFF',
+          bodyText: '#3d2810',
+          tagStroke: '#a34a12',
+          tagBackground: '#ffffff',
+          imagePlaceholder: '#ffe8d4',
+        },
       },
     ],
     null,
@@ -264,6 +285,16 @@ export default function App() {
     }
   }, [])
 
+  const copyCardTags = useCallback(async (tags: string[]) => {
+    setMessage(null)
+    try {
+      await navigator.clipboard.writeText(formatTagsPlain(tags))
+      setMessage(`Tags copied: ${formatTagsPlain(tags)}`)
+    } catch {
+      setMessage('Could not copy tags to clipboard.')
+    }
+  }, [])
+
   const handleDownload = async () => {
     setMessage(null)
     setBusy(true)
@@ -312,8 +343,9 @@ export default function App() {
         <p className="app__lead">
           Put all cards into one JSON field: a single object, an array{' '}
           <code>[...]</code>, or <code>{`{ "cards": [...] }`}</code>. Fields:{' '}
-          <code>title</code>, <code>body</code>, <code>type</code>, <code>tag</code>,
-          optional <code>colors</code>. Use <code>type: "event"</code> for event
+          <code>title</code>, <code>body</code>, <code>type</code>, <code>tag</code>,{' '}
+          <code>tags</code>, optional <code>colors</code>. Use{' '}
+          <code>type: "event"</code> for event
           cards. Images are attached separately for each card in order.
         </p>
       </header>
@@ -368,7 +400,9 @@ export default function App() {
                 You can paste an AI response wrapped in <code>```json</code> ...{' '}
                 <code>```</code>. The number of cards in the array defines the number
                 of image rows below. Supported types: <code>default</code>,{' '}
-                <code>event</code>.
+                <code>event</code>. Field <code>tags</code> is an array of keywords
+                for notes (AI should generate 3–8 per card). Each card should have
+                its own <code>colors</code> palette (AI picks hues per card theme).
               </p>
               <textarea
                 className="field__textarea cards-json-textarea"
@@ -391,6 +425,7 @@ export default function App() {
               </p>
               {imageSlots.slice(0, parsedCount).map((slot, index) => {
                 const rowTitle = cardTitleAt(index)
+                const rowTags = parsedCards?.[index]?.tags
                 return (
                   <div key={slot.id} className="card-images__row">
                     <span className="card-images__idx">{index + 1}</span>
@@ -410,7 +445,26 @@ export default function App() {
                         >
                           Copy title
                         </button>
+                        {rowTags && rowTags.length > 0 ? (
+                          <button
+                            type="button"
+                            className="btn btn--ghost card-images__copy-title"
+                            onClick={() => void copyCardTags(rowTags)}
+                            aria-label={`Copy tags for "${rowTitle}"`}
+                          >
+                            Copy tags
+                          </button>
+                        ) : null}
                       </div>
+                      {rowTags && rowTags.length > 0 ? (
+                        <p className="card-images__tags" title={formatTagsPlain(rowTags)}>
+                          {rowTags.map((t) => (
+                            <span key={t} className="card-images__tag">
+                              {t}
+                            </span>
+                          ))}
+                        </p>
+                      ) : null}
                       <div
                         className={
                           'card-images__paste-zone' +
